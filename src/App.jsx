@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import Spinner from "./components/Spinner.jsx";
 import MovieCard from "./components/MovieCard.jsx";
 import { useDebounce } from "react-use";
-import { getTrendingMovies, updateSearchCount } from "./appwrite.js";
+import { getTrendingMovies, updateSearchCount } from "./localStorageDB.js";
 
 const API_BASE_URL = "https://api.themoviedb.org/3";
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
@@ -12,7 +12,6 @@ const API_OPTIONS = {
   method: "GET",
   headers: {
     accept: "application/json",
-    Authorization: `Bearer ${API_KEY}`,
   },
 };
 
@@ -37,8 +36,13 @@ const App = () => {
 
     try {
       const endpoint = query
-        ? `${API_BASE_URL}/search/movie?query=${encodeURIComponent(query)}`
-        : `${API_BASE_URL}/discover/movie?sort_by=popularity.desc`;
+        ? `${API_BASE_URL}/search/movie?query=${encodeURIComponent(
+            query
+          )}&api_key=${API_KEY}`
+        : `${API_BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}`;
+
+      console.log("Endpoint: ", endpoint);
+      console.log("With Headers: ", API_OPTIONS.headers);
       const response = await fetch(endpoint, API_OPTIONS);
 
       if (!response.ok) {
@@ -117,7 +121,7 @@ const App = () => {
                 {trendingMovies.map((movie, index) => (
                   <li key={movie.$id}>
                     <p>{index + 1}</p>
-                    <img src={movie.poster_url} alt={movie.tite} />
+                    <img src={movie.poster_url} alt={movie.title} />
                   </li>
                 ))}
               </ul>
